@@ -108,19 +108,18 @@ class SearchTransactionView(APIView):
 class CreditView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self,request):
+    def get(self,request,pk=None):
         user = request.user
         enterprise = user.person.enterprise
         status = check_status(user)
-        creditor = request.GET.get('creditor')
         if status == "Admin":
             credits = Credit.objects.filter(enterprise=enterprise)
             if credits:
                 credit_serializer = CreditSerializer(credits,many=True)
-            if creditor:
-                credits = Credit.objects.filter(id = creditor,enterprise=enterprise)
-                if credits:
-                    credit_serializer = CreditSerializer(credits,many=True)
+            if pk:
+                credit = Credit.objects.get(id = pk)
+                if credit:
+                    credit_serializer = CreditSerializer(credit)
                 else:
                     return Response("NONE")
             credit_repairs = Repair.objects.filter(repair_status = "Credited",enterprise_repairs__name=enterprise)
